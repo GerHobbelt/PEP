@@ -6,6 +6,7 @@
     "doc": "docs",
     "test": "test"
   },
+  "main": "dist/PEP.js",
   "devDependencies": {
     "mocha": "*",
     "chai": "^1.9.1",
