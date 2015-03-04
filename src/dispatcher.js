@@ -209,10 +209,10 @@ var dispatcher = {
     }, this);
   },
   addEvent: /*scope.external.addEvent || */function(target, eventName) {
-    target.addEventListener(eventName, this.boundHandler, true);
+    target.addEventListener(eventName, this.boundHandler);
   },
   removeEvent: /*scope.external.removeEvent || */function(target, eventName) {
-    target.removeEventListener(eventName, this.boundHandler, true);
+    target.removeEventListener(eventName, this.boundHandler);
   },
   // EVENT CREATION AND TRACKING
   /**
