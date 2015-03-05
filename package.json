@@ -1,6 +1,6 @@
 {
   "name": "PEP",
-  "version": "0.0.0",
+  "version": "0.3.1",
   "description": "Polyfill of the PointerEvents W3C spec",
   "directories": {
     "doc": "docs",
