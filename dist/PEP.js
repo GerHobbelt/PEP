@@ -722,7 +722,8 @@
   // radius around touchend that swallows mouse events
   var DEDUP_DIST = 25;
 
-  var WHICH_TO_BUTTONS = [0, 1, 4, 2];
+  // left, middle, right, back, forward
+  var BUTTON_TO_BUTTONS = [1, 4, 2, 8, 16];
 
   var HAS_BUTTONS = false;
   try {
@@ -770,49 +771,63 @@
       e.pointerId = this.POINTER_ID;
       e.isPrimary = true;
       e.pointerType = this.POINTER_TYPE;
-      if (!HAS_BUTTONS) {
-        e.buttons = WHICH_TO_BUTTONS[e.which] || 0;
-      }
       return e;
+    },
+    prepareButtonsForMove: function(e, inEvent) {
+      var p = mouseEvents__pointermap.get(this.POINTER_ID);
+      e.buttons = p ? p.buttons : 0;
+      inEvent.buttons = e.buttons
     },
     mousedown: function(inEvent) {
       if (!this.isEventSimulatedFromTouch(inEvent)) {
-        var p = mouseEvents__pointermap.has(this.POINTER_ID);
+        var p = mouseEvents__pointermap.get(this.POINTER_ID);
         // TODO(dfreedman) workaround for some elements not sending mouseup
         // http://crbug/149091
-        if (p) {
-          this.cancel(inEvent);
-        }
         var e = this.prepareEvent(inEvent);
+        if (!HAS_BUTTONS) {
+          e.buttons = BUTTON_TO_BUTTONS[e.button];
+          if (p) e.buttons |= p.buttons;
+          inEvent.buttons = e.buttons
+        }
         mouseEvents__pointermap.set(this.POINTER_ID, inEvent);
-        dispatcher.down(e);
+        if(!p) dispatcher.down(e);
       }
     },
     mousemove: function(inEvent) {
       if (!this.isEventSimulatedFromTouch(inEvent)) {
         var e = this.prepareEvent(inEvent);
+        if (!HAS_BUTTONS) this.prepareButtonsForMove(e, inEvent);
         dispatcher.move(e);
       }
     },
     mouseup: function(inEvent) {
       if (!this.isEventSimulatedFromTouch(inEvent)) {
         var p = mouseEvents__pointermap.get(this.POINTER_ID);
-        if (p && p.button === inEvent.button) {
-          var e = this.prepareEvent(inEvent);
-          dispatcher.up(e);
+        if (!p) return;
+        var e = this.prepareEvent(inEvent);
+        if (!HAS_BUTTONS) {
+          var up = BUTTON_TO_BUTTONS[e.button];
+          e.buttons = p.buttons & ~up;
+          inEvent.buttons = e.buttons;
+        }
+        mouseEvents__pointermap.set(this.POINTER_ID, inEvent);
+        if(e.buttons === 0){
           this.cleanupMouse();
+          dispatcher.up(e);
         }
       }
     },
     mouseover: function(inEvent) {
       if (!this.isEventSimulatedFromTouch(inEvent)) {
         var e = this.prepareEvent(inEvent);
+        if (!HAS_BUTTONS) this.prepareButtonsForMove(e, inEvent);
         dispatcher.enterOver(e);
       }
     },
     mouseout: function(inEvent) {
       if (!this.isEventSimulatedFromTouch(inEvent)) {
         var e = this.prepareEvent(inEvent);
+        if (!HAS_BUTTONS) this.prepareButtonsForMove(e, inEvent);
         dispatcher.leaveOut(e);
       }
     },
