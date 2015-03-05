@@ -72,7 +72,10 @@ var mouseEvents = {
         inEvent.buttons = e.buttons
       }
       pointermap.set(this.POINTER_ID, inEvent);
-      if(!p) dispatcher.down(e);
+      if(!p)
+        dispatcher.down(e);
+      else
+        dispatcher.move(e);
     }
   },
   mousemove: function(inEvent) {
@@ -96,6 +99,8 @@ var mouseEvents = {
       if(e.buttons === 0){
         this.cleanupMouse();
         dispatcher.up(e);
+      } else {
+        dispatcher.move(e);
       }
     }
   },
